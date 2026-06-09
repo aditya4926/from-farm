@@ -46,7 +46,10 @@ app.listen(PORT, () => {
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin:[
+     "http://localhost:5173",
+     "https://from-farm-frontend.vercel.app",
+    ],
     credentials: true,
   })
 );
