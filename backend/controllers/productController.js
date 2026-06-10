@@ -37,7 +37,7 @@ const addProduct = async (req, res) => {
 const getProducts = async (req, res) => {
   try {
     const products = await Product.find()
-      .populate("farmerId", "name mobile village taluka district");
+      .populate("farmerId", "name mobile village taluka district location");
 
     res.json(products);
   } catch (error) {
@@ -51,7 +51,7 @@ const getProductById = async (req, res) => {
     const product = await Product.findById(req.params.id)
       .populate(
         "farmerId",
-        "name mobile village taluka district"
+        "name mobile village taluka district location"
       );
 
     res.json(product);

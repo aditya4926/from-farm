@@ -94,7 +94,9 @@ const loginUser = async (req, res) => {
 };
 
 const updateProfile = async (req, res) => {
+  
   try {
+    console.log("PROFILE BODY =", req.body);
     const user = await User.findById(req.user._id);
 
     if (!user) {
@@ -120,6 +122,13 @@ const updateProfile = async (req, res) => {
 
     user.photo =
       req.body.photo || user.photo;
+
+    if (req.body.latitude && req.body.longitude) {
+      user.location = {
+        latitude: req.body.latitude,
+        longitude: req.body.longitude,
+      };
+    }
 
     await user.save();
 
