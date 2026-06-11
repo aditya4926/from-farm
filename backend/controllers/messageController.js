@@ -42,8 +42,45 @@ const getMessages = async (req, res) => {
     });
   }
 };
+const getChatUsers = async (req, res) => {
+  try {
+    const messages = await Message.find({
+      $or: [
+        { senderId: req.user._id },
+        { receiverId: req.user._id },
+      ],
+    })
+      .populate("senderId", "name mobile role")
+      .populate("receiverId", "name mobile role")
+      .sort({ updatedAt: -1 });
+
+    const users = [];
+
+    messages.forEach((msg) => {
+      const otherUser =
+        msg.senderId._id.toString() === req.user._id.toString()
+          ? msg.receiverId
+          : msg.senderId;
+
+      const exists = users.find(
+        (u) => u._id.toString() === otherUser._id.toString()
+      );
+
+      if (!exists) {
+        users.push(otherUser);
+      }
+    });
+
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
 
 module.exports = {
   sendMessage,
   getMessages,
+  getChatUsers,
 };
