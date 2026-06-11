@@ -9,9 +9,11 @@ const createOrder = async (req, res) => {
     console.log("REQ BODY =", req.body);
     console.log("REQ USER =", req.user);
 
-    const { productId,quantity,razorpayOrderId,razorpayPaymentId,paymentStatus, paymentMethod, } = req.body;
+    const { productId, quantity, razorpayOrderId, razorpayPaymentId, paymentStatus, paymentMethod, } = req.body;
 
-    const product = await Product.findById(productId);
+    const product = await Product.findById(productId)
+      .populate("productId", "title")
+      .populate("customerId", "name");
     console.log("PRODUCT =", product);
     if (!product) {
       return res.status(404).json({
@@ -42,8 +44,8 @@ const createOrder = async (req, res) => {
 
   } catch (error) {
 
-     console.log("CREATE ORDER ERROR =");
-  console.log(error);
+    console.log("CREATE ORDER ERROR =");
+    console.log(error);
     res.status(500).json({
       message: error.message,
     });
@@ -121,6 +123,34 @@ const updateOrderStatus = async (req, res) => {
     order.status = req.body.status;
 
     await order.save();
+    let message = "";
+
+    if (req.body.status === "Accepted") {
+      message = `✅ Your order for ${order.productId.title} has been accepted`;
+    }
+
+    if (req.body.status === "Packed") {
+      message = `📦 Your order for ${order.productId.title} has been packed`;
+    }
+
+    if (req.body.status === "Shipped") {
+      message = `🚚 Your order for ${order.productId.title} has been shipped`;
+    }
+
+    if (req.body.status === "Delivered") {
+      message = `🎉 Your order for ${order.productId.title} has been delivered`;
+    }
+
+    if (req.body.status === "Rejected") {
+      message = `❌ Your order for ${order.productId.title} has been rejected`;
+    }
+
+    if (message) {
+      await Notification.create({
+        userId: order.customerId._id,
+        message,
+      });
+    }
 
     res.json(order);
   } catch (error) {
