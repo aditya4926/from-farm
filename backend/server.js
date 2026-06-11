@@ -57,7 +57,7 @@ app.use("/api/messages", messageRoutes);
 const PORT = process.env.PORT || 5000;
 
 const server = http.createServer(app);
-
+let onlineUsers = {};
 const io = new Server(server, {
   cors: {
     origin: [
@@ -73,6 +73,10 @@ io.on("connection", (socket) => {
 
   socket.on("join", (userId) => {
     socket.join(userId);
+
+    onlineUsers[userId] = socket.id;
+
+    io.emit("onlineUsers", Object.keys(onlineUsers));
   });
 
   socket.on("sendMessage", (data) => {
@@ -80,7 +84,19 @@ io.on("connection", (socket) => {
   });
 
   socket.on("disconnect", () => {
-    console.log("User disconnected:", socket.id);
+    let disconnectedUser = null;
+
+    for (const userId in onlineUsers) {
+      if (onlineUsers[userId] === socket.id) {
+        disconnectedUser = userId;
+        delete onlineUsers[userId];
+        break;
+      }
+    }
+
+    io.emit("onlineUsers", Object.keys(onlineUsers));
+
+    console.log("User disconnected:", disconnectedUser);
   });
 });
 
