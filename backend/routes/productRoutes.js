@@ -1,6 +1,6 @@
 const express = require("express");
 
-const { addProduct, getProducts, getProductById,getMyProducts,deleteProduct,updateProduct,getDashboardStats,uploadImage,addReview, } = require("../controllers/productController");
+const { addProduct, getProducts, getProductById,getMyProducts,deleteProduct,updateProduct,getDashboardStats,uploadImage,getNearbyProducts,addReview, } = require("../controllers/productController");
 
 const { protect } = require("../middleware/authMiddleware");
 
@@ -15,6 +15,7 @@ router.post("/", protect, addProduct);
 router.put("/:id", protect, updateProduct);
 router.delete("/:id", protect, deleteProduct);
 router.post("/upload",protect,upload.single("image"),uploadImage);
+router.get("/nearby",getNearbyProducts);
 router.post("/:id/review",protect, addReview);
 
 module.exports = router; 

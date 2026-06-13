@@ -243,6 +243,81 @@ const addReview = async (req, res) => {
     });
   }
 };
+const getNearbyProducts = async (req, res) => {
+  try {
+    const { latitude, longitude, distance } = req.query;
+
+    if (!latitude || !longitude) {
+      return res.status(400).json({
+        message: "Latitude and longitude required",
+      });
+    }
+
+    const maxDistance = Number(distance) || 25;
+
+    const products = await Product.find()
+      .populate(
+        "farmerId",
+        "name mobile village taluka district location"
+      );
+
+    const nearbyProducts = products.filter((product) => {
+      const farmerLat =
+        product.farmerId?.location?.latitude;
+      const farmerLng =
+        product.farmerId?.location?.longitude;
+
+      if (!farmerLat || !farmerLng) {
+        return false;
+      }
+
+      const calculatedDistance = getDistanceFromLatLonInKm(
+        Number(latitude),
+        Number(longitude),
+        Number(farmerLat),
+        Number(farmerLng)
+      );
+
+      product._doc.distance = calculatedDistance.toFixed(2);
+
+      return calculatedDistance <= maxDistance;
+    });
+
+    res.json(nearbyProducts);
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+const getDistanceFromLatLonInKm = (
+  lat1,
+  lon1,
+  lat2,
+  lon2
+) => {
+  const R = 6371;
+
+  const dLat = deg2rad(lat2 - lat1);
+  const dLon = deg2rad(lon2 - lon1);
+
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(deg2rad(lat1)) *
+      Math.cos(deg2rad(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+
+  const c =
+    2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+  return R * c;
+};
+
+const deg2rad = (deg) => {
+  return deg * (Math.PI / 180);
+};
 
 module.exports = {
   addProduct,
@@ -254,6 +329,7 @@ module.exports = {
   getDashboardStats,
   uploadImage,
   addReview,
+  getNearbyProducts,
 
 
 };
