@@ -53,6 +53,12 @@ const getAllUsers = async (req, res) => {
 };
 const deleteUser = async (req, res) => {
   try {
+    if (req.params.id === req.user._id.toString()) {
+      return res.status(400).json({
+        message: "You cannot delete yourself",
+      });
+    }
+
     const user = await User.findById(req.params.id);
 
     if (!user) {

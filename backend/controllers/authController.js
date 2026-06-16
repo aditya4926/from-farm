@@ -184,9 +184,44 @@ const uploadProfilePhoto = async (req, res) => {
     });
   }
 };
+const getMonthlyRevenue = async (req, res) => {
+  try {
+    const orders = await Order.find({
+      farmerId: req.user._id,
+      status: "Delivered",
+    });
+
+    const monthlyData = {};
+
+    orders.forEach((order) => {
+      const month = new Date(order.createdAt).toLocaleString("default", {
+        month: "short",
+      });
+
+      if (!monthlyData[month]) {
+        monthlyData[month] = 0;
+      }
+
+      monthlyData[month] += order.totalAmount;
+    });
+
+    const result = Object.keys(monthlyData).map((month) => ({
+      month,
+      revenue: monthlyData[month],
+    }));
+
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
   updateProfile,
-  uploadProfilePhoto
+  uploadProfilePhoto,
+  getMonthlyRevenue,
 };
