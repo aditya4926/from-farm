@@ -106,6 +106,21 @@ const deleteProductByAdmin = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+const getAllOrders = async (req, res) => {
+  try {
+    const orders = await Order.find()
+      .populate("customerId", "name mobile")
+      .populate("farmerId", "name mobile")
+      .populate("productId", "title price")
+      .sort({ createdAt: -1 });
+
+    res.json(orders);
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
 
 module.exports = {
   getAdminStats,
@@ -113,4 +128,5 @@ module.exports = {
   deleteUser,
   getAllProducts,
   deleteProductByAdmin,
+  getAllOrders,
 };

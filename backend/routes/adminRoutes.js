@@ -7,6 +7,7 @@ const {
   deleteUser,
   getAllProducts,
   deleteProductByAdmin,
+  getAllOrders,
   
 } = require("../controllers/adminController");
 
@@ -29,6 +30,7 @@ router.get("/products", protect, adminOnly, getAllProducts);
 
 router.delete("/products/:id", protect, adminOnly, deleteProductByAdmin);
 router.delete("/users/:id", protect, adminOnly, deleteUser);
+router.get("/orders",protect,adminOnly,getAllOrders);
 
 
 module.exports = router;
