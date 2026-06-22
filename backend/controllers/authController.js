@@ -4,6 +4,7 @@ const generateToken = require("../utils/generateToken");
 const { protect } = require("../middleware/authMiddleware");
 const cloudinary = require("../config/cloudinary");
 const streamifier = require("streamifier");
+const Product = require("../models/Product");
 
 const registerUser = async (req, res) => {
   try {
@@ -94,7 +95,7 @@ const loginUser = async (req, res) => {
 };
 
 const updateProfile = async (req, res) => {
-  
+
   try {
     console.log("PROFILE BODY =", req.body);
     const user = await User.findById(req.user._id);
@@ -217,6 +218,30 @@ const getMonthlyRevenue = async (req, res) => {
     });
   }
 };
+const getFarmerProfile = async (req, res) => {
+  try {
+    const farmer = await User.findById(req.params.id).select("-password");
+
+    if (!farmer || farmer.role !== "farmer") {
+      return res.status(404).json({
+        message: "Farmer not found",
+      });
+    }
+
+    const products = await Product.find({
+      farmerId: farmer._id,
+    });
+
+    res.json({
+      farmer,
+      products,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
 
 module.exports = {
   registerUser,
@@ -224,4 +249,5 @@ module.exports = {
   updateProfile,
   uploadProfilePhoto,
   getMonthlyRevenue,
+  getFarmerProfile,
 };

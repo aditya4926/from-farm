@@ -6,6 +6,7 @@ const {
   updateProfile,
   uploadProfilePhoto,
   getMonthlyRevenue,
+  getFarmerProfile,
 } = require("../controllers/authController");
 const upload = require(
   "../middleware/uploadMiddleware"
@@ -17,4 +18,6 @@ router.post("/login", loginUser);
 router.put("/profile",protect,updateProfile);
 router.post("/upload-photo",protect,upload.single("image"),uploadProfilePhoto);
 router.get("/monthly-revenue",protect,getMonthlyRevenue);
+router.get("/farmer/:id", getFarmerProfile);
+
 module.exports = router;
